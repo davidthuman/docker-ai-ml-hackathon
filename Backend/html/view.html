@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="whtmlidth=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <title>{{.Title}}</title>
+    <script>
+        window.onload = function () {
+            var player = document.getElementById("audio_player");
+            var player;
+            var lastword = null;
+
+            // So we can compare against new updates.
+            var lastTimeUpdate = "-1";
+
+            setInterval(function () {
+                // currentTime is checked very frequently (1 millisecond),
+                // but we only care about whole second changes.
+                var ts = (player.currentTime).toFixed(1).toString();
+                ts = (Math.round((player.currentTime) * 5) / 5).toFixed(1);
+                ts = ts.toString();
+                console.log(ts);
+                if (ts !== lastTimeUpdate) {
+                    lastTimeUpdate = ts;
+
+                    // Its now up to you to format the time.
+                    word = document.getElementById(ts)
+                    if (word) {
+                        if (lastword) {
+                            lastword.style.textShadow = "";
+                        }
+                        lastword = word;
+                        word.style.textShadow = "1px 0px 0px black";
+
+                        let toggle = document.getElementById("autoscroll");
+                        if (toggle.checked) {
+                            let position = word.offsetTop - 20;
+                            window.scrollTo({
+                                top: position,
+                                behavior: "smooth"
+                            });
+                        }
+                    }
+                }
+            }, 0.1);
+        }
+        function jumptoTime(timepoint, id) {
+            var player = document.getElementById("audio_player");
+            history.pushState(null, null, "#" + id);
+            player.pause();
+            player.currentTime = timepoint;
+            player.play();
+        }
+    </script>
+</head>
+<body class="p-5 grid gap-2">
+    <h2 class="text-xl">{{.Title}}</h2>
+    <i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
+        <br><br>
+    </i>
+    <div id="player-div">
+        <div id="player">
+            <audio controls="controls" id="audio_player">
+                <source src="{{.FilePath}}" />
+            </audio>
+        </div>
+        <div><label for="autoscroll">auto-scroll: </label>
+            <input type="checkbox" id="autoscroll" checked>
+        </div>
+    </div>
+    {{with .Transcript}}
+        {{range .}}
+        <div class="border-2 rounded-md p-4">
+            <div class="font-bold">{{.Speaker}}</div>
+            <div class="flex flex-wrap">
+            {{with .Result.Segments}}
+                {{range .}}
+                    {{with .}}
+                        {{range .Words}}
+                            <a href="#{{ .StartTimeString }}" id="{{ .StartIdString }}" class="p-1 bg-[{{ .ConfColor }}]/30" onclick="jumptoTime({{ .StartIdInt }}, {{ .StartIdString }})">{{.Word}}</a>
+                        {{end}}
+                    {{end}}
+                {{end}}
+            {{end}}
+            </div>
+        </div>
+        {{end}}
+    {{end}}
+</body>
+</html>
