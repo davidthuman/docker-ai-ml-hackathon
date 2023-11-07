@@ -1,0 +1,16 @@
+.vscode/
+
+.DS_Store
+
+# Backend Folder
+Backend/database/
+Backend/uploads/
+Backend/Backend
+
+# Example
+speech-to-text/
+
+# Model Folder
+Model/.cache/
+Model/.venv/
+Model/sandbox.ipynb

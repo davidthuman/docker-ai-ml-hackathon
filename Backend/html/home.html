@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</head>
+<body class="grid">
+    <div class="bg-[#1D63ED] text-white p-5"><a href="/">Speech-to-Text</a></div>
+
+    <div class="justify-self-center text-xl m-5">Hello {{ .User.Name }}!</div>
+
+
+    <div class="border-2 m-2 p-5 grid w-2/3 justify-self-center">
+        <div class="text-lg justify-self-center mb-5"> Upload an audio file </div>
+        <form id="form" hx-encoding="multipart/form-data" hx-post="/upload/" hx-swap="beforeend" hx-target="#audioList" hx-on::after-request="this.reset()" class="grid justify-center gap-2">
+            <div>
+                <label>Audio Name</label>
+                <input type="text" name="name" class="border-2 rounded-md px-2">
+            </div>
+            <input type="file" name="file">
+            <button class="border-2 rounded-md px-2 hover:border-[#1D63ED]">
+                Upload Audio
+            </button>
+        </form>
+    </div>
+
+    <div class="border-2 m-2 p-5 grid w-2/3 justify-self-center">
+        <div class="text-lg justify-self-center mb-5">Your Audio Files</div>
+        <div id="audioList" class="grid justify-center gap-2">
+            {{ range .Audios }}
+                <div class="flex gap-2">
+                    <div>{{ .Name }}</div>
+                    {{ if .HasTranscript }}
+                        <a href="/transcript/{{ .ID }}" class="border-2 rounded-md px-2 hover:border-[#1D63ED]"> View Transcript </a>
+                    {{ else }}
+                        <buttom hx-post="/transcribe/{{ .ID }}" hx-swap="outerHTML" class="border-2 rounded-md px-2 hover:border-[#1D63ED]"> Generate Transcript </buttom>
+                    {{ end }}
+                </div>
+            {{ end }}
+        </div>
+    </div>
+</body>
+</html>
